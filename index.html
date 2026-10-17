@@ -2934,11 +2934,36 @@ function buildTrackBlobUrl(t,streamIdx,opts={}){
   return null;
 }
 
+// ---- Native ffmpeg fallback (sirf Windows EXE mein, H.265/MKV/AVI/AC3/DTS etc.) ----
+async function nativeFallback(t,savedTime){
+  const N=window.auroraNative;
+  if(!N||!t||!t.file||t._nativeTried)return false;
+  t._nativeTried=1;
+  try{
+    const f=t.file,isV=!!t.video;
+    toast('Browser is format ko nahi chala pa raha — ffmpeg se convert ho raha hai…',8000);
+    N.onProgress(p=>toast('Convert ho raha hai: '+p+'%',3000));
+    const b=await N.begin({name:f.name||t.title||'f',size:f.size,mtime:f.lastModified||0,isVideo:isV});
+    let url;
+    if(b.cached)url=b.url;
+    else{
+      const CH=8*1024*1024;
+      for(let o=0;o<f.size;o+=CH){await N.write(b.id,await f.slice(o,o+CH).arrayBuffer())}
+      url=(await N.convert(b.id,isV)).url;
+    }
+    if(t._patchedUrl)try{URL.revokeObjectURL(t._patchedUrl)}catch(e){}
+    pend=savedTime||0;au.src=url;au.load();au.play().catch(()=>{});
+    toast('Convert ho gaya, play ho raha hai',2500);
+    return true;
+  }catch(e){toast('Convert fail: '+(e.message||e),7000);return false}
+}
+
 // Multi-stage automatic H.265 / MKV / Multi-Audio codec error recovery
 au.onerror=async()=>{
   if(!au.getAttribute('src'))return;
   const t=T(queue[i])||T(queue[0]);
   if(!t||!t.video||!t.file){
+    if(t&&t.file&&await nativeFallback(t,au.currentTime))return;
     toast('Is file ko browser play nahi kar paya.',4000);
     return;
   }
@@ -2998,6 +3023,7 @@ au.onerror=async()=>{
       return;
     }
   }
+  if(await nativeFallback(t,savedTime))return;
   const vCodec=t.videoCodec?` (${t.videoCodec})`:'';
   toast(`Is video format${vCodec} ka hardware decoder is browser mein uplabdh nahi hai.`,5500);
 };
