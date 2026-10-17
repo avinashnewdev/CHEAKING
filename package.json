@@ -1,0 +1,23 @@
+{
+  "name": "aurora-music",
+  "version": "1.0.0",
+  "description": "Aurora Music Player",
+  "main": "main.js",
+  "author": "Avinash",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.avinash.aurora",
+    "productName": "Aurora Music",
+    "files": ["main.js", "index.html", "sw.js", "manifest.webmanifest", "*.png", "*.ico"],
+    "win": { "target": "nsis", "icon": "icon.ico" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+  }
+}
