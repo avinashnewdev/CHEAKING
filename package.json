@@ -16,8 +16,28 @@
   "build": {
     "appId": "com.avinash.aurora",
     "productName": "Aurora Music",
-    "files": ["main.js", "index.html", "sw.js", "manifest.webmanifest", "*.png", "*.ico"],
-    "win": { "target": "nsis", "icon": "icon.ico" },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "sw.js",
+      "manifest.webmanifest",
+      "*.png",
+      "*.ico"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**"
+    ]
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
   }
 }
